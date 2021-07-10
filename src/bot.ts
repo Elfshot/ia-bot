@@ -12,7 +12,7 @@ class BotClient extends AkairoClient {
 
   constructor() {
     super({
-      ownerID: process.env.BOT_OWNERS?.split(',')
+      ownerID: process.env.BOT_OWNERS.split(',')
     }, {
       disableMentions: 'everyone'
     });

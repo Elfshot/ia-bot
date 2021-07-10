@@ -1,5 +1,6 @@
+//TODO: split this up into imports/exports
 import { Command } from 'discord-akairo';
-import { Message, MessageEmbed, RichPresenceAssets } from 'discord.js';
+import { Message, MessageEmbed } from 'discord.js';
 import { google } from 'googleapis';
 import { Credentials } from 'google-auth-library';
 import { numberToEncodedLetter } from '../misc/numberToLetters';
@@ -16,7 +17,7 @@ const jwtClient = new google.auth.JWT(
     'https://www.googleapis.com/auth/drive',
     'https://www.googleapis.com/auth/calendar']
 );
-const voucherMoney = {
+const voucherMoney: ranks= {
   'Pilot': 9000,
   'Seasoned Pilot': 10500,
   'Seasoned Pilot FM': 11025,
@@ -57,6 +58,7 @@ export default class TurnInCommand extends Command {
   constructor() {
     super('turnin', {
       aliases: ['turnin'],
+      description: '`?turnin [in-game id] [amount]` everything is done automatically.',
       args: [
         {
           id: 'userId',
@@ -143,6 +145,8 @@ export default class TurnInCommand extends Command {
       const previousVouchers = subjectRow[verticles.collector] ? parseSheet(subjectRow[verticles.collector]) : 0;
       const newVouchers = previousVouchers + newVouchersCount;
       const subjectRank:keyof(ranks) = subjectRow[2];
+      if (subjectRank.includes('CEO')) return msg.reply('Cannot add vouchers to CEO ranks');
+      if (!subjectRank) return msg.reply('User has no rank');
       const cleanSubjectRank:keyof(ranks) = subjectRank == 'Seasoned Pilot FM'? 'Seasoned Pilot': subjectRank;
       const previousVoucherTotal = subjectRow[verticles[cleanSubjectRank]] ? parseSheet(subjectRow[verticles[cleanSubjectRank]]) : 0;
       const newVoucherTotal = previousVoucherTotal + newVouchersCount;
@@ -150,6 +154,7 @@ export default class TurnInCommand extends Command {
       const dateString = `${date.getUTCMonth()+1}/${date.getUTCDate()}/${date.getUTCFullYear()}`;
       const newCompleteVoucherTotal = subjectRow[verticles['Total Vouchers']] ? parseSheet(subjectRow[verticles['Total Vouchers']]) + newVouchersCount : newVouchersCount;
       const payout = newVouchersCount * voucherMoney[subjectRank];
+      
       await updateSheet(collectionsSheet + `!${numberToEncodedLetter(verticles.collector+1)}${hori+1}`, newVouchers);
       await updateSheet(collectionsSheet + 
         `!${numberToEncodedLetter(verticles[cleanSubjectRank]+1)}${hori+1}`,
