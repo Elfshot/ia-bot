@@ -1,5 +1,5 @@
 import { Command } from 'discord-akairo';
-import { Message } from 'discord.js';
+import { Message, MessageEmbed, RichPresenceAssets } from 'discord.js';
 import { google } from 'googleapis';
 import { Credentials } from 'google-auth-library';
 import { numberToEncodedLetter } from '../misc/numberToLetters';
@@ -38,6 +38,7 @@ interface categories {
   'Fleet Admiral': number;
   'Grand Moff': number;
   'Last Turn-in': number;
+  'Total Vouchers': number;
 }
 interface Schema$ValueRange {
   majorDimension?: string | null;
@@ -84,12 +85,13 @@ export default class TurnInCommand extends Command {
         'Fleet Admiral': 0,
         'Grand Moff': 0,
         'Last Turn-in': 0,
+        'Total Vouchers': 0,
       };
 
       //Initial setup and 
       if (!subjectId) return msg.reply('No user specified!');
       else if (!newVouchersCount) return msg.reply('No vouchers amount specified!');
-      else if (newVouchersCount < 10) return msg.reply('We don\'t take less than 10 vouchers :wink:');
+      //else if (newVouchersCount < 10) return msg.reply('We don\'t take less than 10 vouchers :wink:');
       else if (newVouchersCount > 1000000) return msg.reply('no.');
       const originalSheet = await getSheet();
       
@@ -112,6 +114,9 @@ export default class TurnInCommand extends Command {
           case 'Grand Moff':
             verticles['Grand Moff'] = i;
             break;
+          case 'Total Vouchers':
+            verticles['Total Vouchers'] = i;
+            break;
           case 'Last Turn-in':
             verticles['Last Turn-in'] = i;
             break;
@@ -122,38 +127,54 @@ export default class TurnInCommand extends Command {
       }
 
       for (let i = 0; i < originalSheet.length; i++) {
-        const current = originalSheet[i][0];
+        const current = originalSheet[i][1];
         if (current.includes('No longer in company')) break;
-        if (current.includes(` - ${subjectId}`)) { //TODO - change the sheet and here to just get the id from another cell for security reasons
+        if (current.includes(`${subjectId}`)) {
           hori = i;
           break;
         }
       }
       if (verticles.collector === 0) return msg.reply(`Collector "<@${collectorId}>" not found!`);
       else if (hori === 0) return msg.reply(`User "${subjectId}" cannot be found.`);
-      else if (verticles['Last Turn-in'] === 0 || verticles['Pilot'] === 0 || verticles['Grand Moff'] === 0) return msg.reply('Nope, the sheet changed... in a bad way');
+      else if (verticles['Last Turn-in'] === 0 || verticles['Pilot'] === 0 || verticles['Grand Moff'] === 0 || verticles['Total Vouchers'] === 0) return msg.reply('Nope, the sheet changed... in a bad way');
       
-      const subject:string = originalSheet[hori][0];
-      const previousVouchers = originalSheet[hori][verticles.collector] ? parseInt(originalSheet[hori][verticles.collector]) : 0;
+      const subjectRow:any[] | string[] = originalSheet[hori];
+      const subject:string = subjectRow[0];
+      const previousVouchers = subjectRow[verticles.collector] ? parseSheet(subjectRow[verticles.collector]) : 0;
       const newVouchers = previousVouchers + newVouchersCount;
-      const subjectRank:keyof(ranks) = originalSheet[hori][1];
+      const subjectRank:keyof(ranks) = subjectRow[2];
       const cleanSubjectRank:keyof(ranks) = subjectRank == 'Seasoned Pilot FM'? 'Seasoned Pilot': subjectRank;
-      const previousVoucherTotal = originalSheet[hori][verticles[cleanSubjectRank]] ? parseInt(originalSheet[hori][verticles[cleanSubjectRank]]) : 0;
+      const previousVoucherTotal = subjectRow[verticles[cleanSubjectRank]] ? parseSheet(subjectRow[verticles[cleanSubjectRank]]) : 0;
       const newVoucherTotal = previousVoucherTotal + newVouchersCount;
       const date = new Date();
       const dateString = `${date.getUTCMonth()+1}/${date.getUTCDate()}/${date.getUTCFullYear()}`;
-
+      const newCompleteVoucherTotal = subjectRow[verticles['Total Vouchers']] ? parseSheet(subjectRow[verticles['Total Vouchers']]) + newVouchersCount : newVouchersCount;
+      const payout = newVouchersCount * voucherMoney[subjectRank];
       await updateSheet(collectionsSheet + `!${numberToEncodedLetter(verticles.collector+1)}${hori+1}`, newVouchers);
       await updateSheet(collectionsSheet + 
         `!${numberToEncodedLetter(verticles[cleanSubjectRank]+1)}${hori+1}`,
       newVoucherTotal);
       await updateSheet(collectionsSheet + `!${numberToEncodedLetter(verticles['Last Turn-in']+1)}${hori+1}`, dateString);
 
-      let conformationString = `Added \`${newVouchersCount}\` vouchers to \`${subject}\` by <@${collectorId}>. Payout: $\`${newVouchersCount * voucherMoney[subjectRank]}\``;
+      let conformationString = `Added \`${newVouchersCount}\` vouchers to \`${subject}\` by <@${collectorId}>. Payout: $\`${payout}\``;
       conformationString += `\nNew total for \`${cleanSubjectRank}\`: \`${newVoucherTotal}\``;
       console.log(conformationString);
-      msg.channel.send(conformationString);
-      
+      //msg.channel.send(conformationString);
+      const embed = new MessageEmbed({
+        type: 'rich',
+        title: `Vouchers received for ${subjectId}`,
+        fields:[
+          { name: 'Collector', value: `<@${collectorId}>`, inline: true },
+          { name: 'Vouchers Taken', value: newVouchersCount, inline: true },
+          { name: 'Payout', value: payout, inline: true },
+          { name: 'New total', value: newCompleteVoucherTotal, inline: true },
+          //{ name: 'something', value: 'something else', inline: true }, placeholder
+        ],
+        image: { url: msg.author.avatarURL({ dynamic: true }) },
+        footer: { text: 'Elfshot', iconURL: 'https://avatars.githubusercontent.com/u/44043197' }
+      });
+      embed.setTimestamp();
+      msg.channel.send(embed);
     }
     catch(err) {
       console.log(err);
@@ -201,6 +222,9 @@ async function updateSheet(range: string, replaceData: string | number,): Promis
     return response;
   } catch (err) {
     console.log(err);
-    throw Error('Failed to update collected vouchers');
+    throw Error('Failed to update collected vouchers (check the history and fix!)');
   }
+}
+function parseSheet(a: string):number {
+  return parseInt(a.replace(/,/g, ''));
 }

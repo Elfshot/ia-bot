@@ -31,5 +31,18 @@ module.exports = {
       'error', 
       'always'
     ],
+    'no-warning-comments': [
+      1, { 
+        'terms': [
+          'todo', 
+          'change',
+          'fixme', 
+          'fix',
+          'bug', 
+          'buggy',
+        ],
+        'location': 'anywhere',
+      }
+    ]
   }
 };
