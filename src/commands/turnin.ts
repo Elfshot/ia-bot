@@ -1,6 +1,7 @@
 import { Command } from 'discord-akairo';
 import { Message } from 'discord.js';
 import { google } from 'googleapis';
+import { Credentials } from 'google-auth-library';
 import { numberToEncodedLetter } from '../misc/numberToLetters';
 
 const privatekey = JSON.parse(process.env.GOOGLECREDS);
@@ -38,6 +39,19 @@ interface categories {
   'Grand Moff': number;
   'Last Turn-in': number;
 }
+interface Schema$ValueRange {
+  majorDimension?: string | null;
+  range?: string | null;
+  values?: any[][] | null;
+}
+interface Schema$UpdateValuesResponse {
+  spreadsheetId?: string | null;
+  updatedCells?: number | null;
+  updatedColumns?: number | null;
+  updatedData?: Schema$ValueRange;
+  updatedRange?: string | null;
+  updatedRows?: number | null;
+}
 export default class TurnInCommand extends Command {
   constructor() {
     super('turnin', {
@@ -72,7 +86,7 @@ export default class TurnInCommand extends Command {
         'Last Turn-in': 0,
       };
 
-      //Initial setup and auth
+      //Initial setup and 
       if (!subjectId) return msg.reply('No user specified!');
       else if (!newVouchersCount) return msg.reply('No vouchers amount specified!');
       else if (newVouchersCount < 10) return msg.reply('We don\'t take less than 10 vouchers :wink:');
@@ -119,7 +133,7 @@ export default class TurnInCommand extends Command {
       else if (hori === 0) return msg.reply(`User "${subjectId}" cannot be found.`);
       else if (verticles['Last Turn-in'] === 0 || verticles['Pilot'] === 0 || verticles['Grand Moff'] === 0) return msg.reply('Nope, the sheet changed... in a bad way');
       
-      const subject = originalSheet[hori][0];
+      const subject:string = originalSheet[hori][0];
       const previousVouchers = originalSheet[hori][verticles.collector] ? parseInt(originalSheet[hori][verticles.collector]) : 0;
       const newVouchers = previousVouchers + newVouchersCount;
       const subjectRank:keyof(ranks) = originalSheet[hori][1];
@@ -147,15 +161,15 @@ export default class TurnInCommand extends Command {
     }
   }
 }
-async function authorize(): Promise<any> {
+async function authorize(): Promise<Credentials | null> {
   try {
     const auth = await jwtClient.authorize();
-    return auth.access_token ? auth : false;
+    return auth.access_token ? auth : null;
   } catch(err) { 
     throw Error('Could not authenticate with Google Sheets');
   }
 }
-async function getSheet(): Promise<any> {
+async function getSheet(): Promise<any[][] | null> {
   await authorize();
   const request = {
     spreadsheetId: spreadsheetId,
@@ -170,7 +184,7 @@ async function getSheet(): Promise<any> {
     throw Error('Failed to get data from Google Sheets');
   }
 }
-async function updateSheet(range: string, replaceData: string | number,): Promise<any> {
+async function updateSheet(range: string, replaceData: string | number,): Promise<Schema$UpdateValuesResponse> {
   await authorize();
   const request = {
     spreadsheetId: spreadsheetId,  
