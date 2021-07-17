@@ -10,8 +10,8 @@ export default class PingCommand extends Command {
     });
   }
 
-  exec(msg: Message): void {
-    msg.reply('Shutting down!');
+  async exec(msg: Message): Promise<void> {
+    await msg.reply('Shutting down!');
     client.destroy();
     console.log(`Bot shutdown by ${msg.author.id}`);
     process.exit(0);

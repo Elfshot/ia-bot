@@ -70,7 +70,8 @@ export default class TurnInCommand extends Command {
           type: 'number',
           default: null,
         }
-      ]
+      ],
+      channel: 'guild',
     });
   }  
   async exec(msg: Message,args: { userId: string, amount: number }): Promise<Message> {
@@ -167,11 +168,11 @@ export default class TurnInCommand extends Command {
       //msg.channel.send(conformationString);
       const embed = new MessageEmbed({
         type: 'rich',
-        title: `Vouchers received for ${subjectId}`,
+        title: `Vouchers received for ${subject}`,
         fields:[
           { name: 'Collector', value: `<@${collectorId}>`, inline: true },
           { name: 'Vouchers Taken', value: newVouchersCount, inline: true },
-          { name: 'Payout', value: payout, inline: true },
+          { name: 'Payout', value: `$ ${payout}`, inline: true },
           { name: 'New total', value: newCompleteVoucherTotal, inline: true },
           //{ name: 'something', value: 'something else', inline: true }, placeholder
         ],
@@ -212,6 +213,7 @@ async function getSheet(): Promise<any[][] | null> {
 }
 async function updateSheet(range: string, replaceData: string | number,): Promise<Schema$UpdateValuesResponse> {
   await authorize();
+  if (replaceData == 0) replaceData = '';
   const request = {
     spreadsheetId: spreadsheetId,  
     range: range, 
