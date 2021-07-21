@@ -4,7 +4,9 @@ import { Message, MessageEmbed } from 'discord.js';
 import { google } from 'googleapis';
 import { Credentials } from 'google-auth-library';
 import { numberToEncodedLetter } from '../misc/numberToLetters';
+import axios from 'axios';
 
+const WhLink = process.env.WHLINK;
 const privatekey = JSON.parse(process.env.GOOGLECREDS);
 const spreadsheetId = process.env.GOOGLESHEETID;
 const collectionsSheet = 'Copy of Voucher Collections 2.0';
@@ -181,11 +183,20 @@ export default class TurnInCommand extends Command {
       });
       embed.setTimestamp();
       msg.channel.send(embed);
+      await discordLog(conformationString);
     }
     catch(err) {
       console.log(err);
       return msg.reply(err.message);
     }
+  }
+}
+async function discordLog(msg: string): Promise<void> {
+  try {
+    await axios.post(WhLink, { content: msg, timeout: 5000 });
+  } catch (err) {
+    console.log(err);
+    throw Error('Could not log to discord(not very important) <@&847275183114027028>');
   }
 }
 async function authorize(): Promise<Credentials | null> {
