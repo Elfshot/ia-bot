@@ -4,7 +4,7 @@ import { Credentials } from 'google-auth-library';
 const spreadsheetId = process.env.GOOGLESHEETID;
 const sheets = google.sheets('v4');
 const privatekey = JSON.parse(process.env.GOOGLECREDS);
-const collectionsSheet = 'Copy of Voucher Collections 2.0';
+const collectionsSheet = process.env.COLLECTIONSNAME;
 const jwtClient = new google.auth.JWT(
   privatekey.client_email,
   null,
@@ -42,7 +42,7 @@ export async function updateSheet(range: string, replaceData: string | number,):
   if (replaceData == 0) replaceData = '';
   const request = {
     spreadsheetId: spreadsheetId,  
-    range: range, 
+    range: collectionsSheet + range, 
     valueInputOption: 'USER_ENTERED',
     resource: {
       values: [[replaceData]],
@@ -59,7 +59,8 @@ export async function updateSheet(range: string, replaceData: string | number,):
   }
 }
 export function parseSheet(a: string):number {
-  return parseInt(a.replace(/,/g, ''));
+  const b = parseInt(a.replace(/,/g, ''));
+  return b?b:0;
 }
 export function getVerts(sheet: any[][], collectorId?: string): categories {
   const verticles: categories = {

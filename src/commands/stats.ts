@@ -2,6 +2,11 @@ import { Command } from 'discord-akairo';
 import { Message, MessageEmbed } from 'discord.js';
 import { getSheet, parseSheet, ranks, categories, getVerts, getHori } from '../utils/sheets';
 
+interface ranksWiCEO extends ranks {
+  'Co-CEO'?: number;
+  'CEO'?: number;
+}
+
 export default class StatsCommand extends Command {
   constructor() {
     super('stats', {
@@ -33,9 +38,9 @@ export default class StatsCommand extends Command {
       
       const subjectRow:any[] | string[] = originalSheet[hori];
       const subject:string = subjectRow[0];
-      const subjectRank:keyof(ranks) = subjectRow[2];
+      const subjectRank:keyof(ranksWiCEO) = subjectRow[2];
       
-      if (subjectRank.includes('CEO')) return msg.reply('Cannot add vouchers to CEO ranks');
+      if (subjectRank === 'CEO') return msg.reply('Cannot add vouchers to CEO ranks');
       if (!subjectRank) return msg.reply('User has no rank');
       const vouchers = [parseSheet(subjectRow[verticles.Pilot]), parseSheet(subjectRow[verticles['Seasoned Pilot']]), 
         parseSheet(subjectRow[verticles['Fleet Admiral']]), parseSheet(subjectRow[verticles['Grand Moff']])]; 
