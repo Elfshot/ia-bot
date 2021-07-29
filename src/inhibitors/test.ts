@@ -1,5 +1,4 @@
 import { Inhibitor } from 'discord-akairo';
-import { Message } from 'discord.js';
 
 export default class TestInhibitor extends Inhibitor {
   constructor() {
@@ -8,7 +7,7 @@ export default class TestInhibitor extends Inhibitor {
     });
   }
 
-  exec(msg: Message): boolean {
+  exec(): boolean {
     return false; //? if true, this message will be blocked, and the reason will be 'test'
   }
 }

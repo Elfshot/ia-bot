@@ -30,6 +30,7 @@ export default class TurnInCommand extends Command {
         }
       ],
       channel: 'guild',
+      userPermissions: 803415711028215838,
     });
   }  
   async exec(msg: Message,args: { userId: string, amount: number }): Promise<Message> {
