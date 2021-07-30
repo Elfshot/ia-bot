@@ -5,9 +5,8 @@
   "main": "bot.js",
   "scripts": {
     "build": "echo \"Updating packages, Deleting dist/ and re-compiling\" && npm install && rimraf dist/ && tsc",
-    "start": "nodemon --delay 5 dist/bot.js",
-    "startdev": "tsc && node dist/bot.js",
-    "startserver": "node dist/bot.js"
+    "start": "rimraf dist/ && tsc && node dist/bot.js",
+    "startprod": "pm2 dist/bot.js"
   },
   "keywords": [],
   "author": "",

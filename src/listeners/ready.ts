@@ -9,7 +9,7 @@ export default class ReadyListener extends Listener {
   }
 
   exec(): any {
-    console.log('Bot ready');
+    console.log(`Logged in as ${this.client.user.username}#${this.client.user.discriminator}`);
     this.client.user.setActivity({ type: 'PLAYING', name: 'With vouchers.' });
   }
 }
