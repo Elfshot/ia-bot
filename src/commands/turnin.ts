@@ -64,7 +64,9 @@ export default class TurnInCommand extends Command {
       const cleanSubjectRank:keyof(ranks) = subjectRank == 'Seasoned Pilot FM'? 'Seasoned Pilot': subjectRank;
       const previousVoucherTotal = subjectRow[verticles[cleanSubjectRank]] ? parseSheet(subjectRow[verticles[cleanSubjectRank]]) : 0;
       const newVoucherTotal = previousVoucherTotal + newVouchersCount;
-      const dateString = `${date.getUTCMonth()+1}/${date.getUTCDate()}/${date.getUTCFullYear()}`;
+      const month = date.getUTCMonth();
+      const year = date.getUTCFullYear();
+      const dateString = `${month +2 <= 12? month +2: '1'}/1/${month +1 <= 12? year +1: year}`;
       const newCompleteVoucherTotal = subjectRow[verticles['Total Vouchers']] ? parseSheet(subjectRow[verticles['Total Vouchers']]) + newVouchersCount : newVouchersCount;
       const payout = newVouchersCount * voucherMoney[subjectRank];
       
@@ -76,7 +78,7 @@ export default class TurnInCommand extends Command {
       await updateSheet(`!${numberToEncodedLetter(verticles['Last Turn-in']+1)}${hori+1}`, dateString);
 
       let conformationString = `Added \`${newVouchersCount}\` vouchers to \`${subject}\` by <@${collectorId}>. Payout: $\`${payout}\``;
-      conformationString += `\nNew total for \`${cleanSubjectRank}\`: \`${newVoucherTotal}\``;
+      conformationString += `\nNew total for \`${cleanSubjectRank}\`: \`${newVoucherTotal}\`\n New date: ${dateString}`;
       console.log(conformationString);
       
       const embed = new MessageEmbed({
