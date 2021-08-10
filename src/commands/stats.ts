@@ -2,6 +2,9 @@ import { Command } from 'discord-akairo';
 import { Message, MessageEmbed } from 'discord.js';
 import { getSheet, parseSheet, ranks, categories, getVerts, getHori } from '../utils/sheets';
 
+const collectionsSheet = process.env.COLLECTIONSNAME;
+
+
 interface ranksWiCEO extends ranks {
   'Co-CEO'?: number;
   'CEO'?: number;
@@ -29,7 +32,7 @@ export default class StatsCommand extends Command {
 
       //Initial setup and 
       if (!subjectId) return msg.reply('No user specified!');
-      const originalSheet = await getSheet();
+      const originalSheet = await getSheet(collectionsSheet);
       
       const verticles: categories = getVerts(originalSheet, collectorId); 
       const hori = getHori(originalSheet, subjectId);

@@ -4,7 +4,6 @@ import { Credentials } from 'google-auth-library';
 const spreadsheetId = process.env.GOOGLESHEETID;
 const sheets = google.sheets('v4');
 const privatekey = JSON.parse(process.env.GOOGLECREDS);
-const collectionsSheet = process.env.COLLECTIONSNAME;
 const jwtClient = new google.auth.JWT(
   privatekey.client_email,
   null,
@@ -22,11 +21,11 @@ export async function authorize(): Promise<Credentials | null> {
     throw Error('Could not authenticate with Google Sheets');
   }
 }
-export async function getSheet(): Promise<any[][] | null> {
+export async function getSheet(sheet: string): Promise<any[][] | null> {
   await authorize();
   const request = {
-    spreadsheetId: spreadsheetId,
-    range: collectionsSheet,
+    spreadsheetId,
+    range: sheet,
     auth: jwtClient,
   };
   try {
@@ -37,15 +36,17 @@ export async function getSheet(): Promise<any[][] | null> {
     throw Error('Failed to get data from Google Sheets');
   }
 }
-export async function updateSheet(range: string, replaceData: string | number,): Promise<Schema$UpdateValuesResponse> {
+
+export async function updateSheet(sheet: string, range: string, replaceData: string[]|string[][], dim?:'ROWS'|'COLUMNS'): Promise<Schema$UpdateValuesResponse> {
+  dim = dim || 'ROWS';
   await authorize();
-  if (replaceData == 0) replaceData = '';
   const request = {
-    spreadsheetId: spreadsheetId,  
-    range: collectionsSheet + range, 
+    spreadsheetId,  
+    range: sheet + range, 
     valueInputOption: 'USER_ENTERED',
     resource: {
-      values: [[replaceData]],
+      majorDimension: dim,
+      values: [replaceData],
     },
     auth: jwtClient,
   };
@@ -55,12 +56,11 @@ export async function updateSheet(range: string, replaceData: string | number,):
     return response;
   } catch (err) {
     console.log(err);
-    throw Error('Failed to update collected vouchers (check the history and fix!)');
+    throw Error(`Failed to update collected vouchers (${sheet + range})`);
   }
 }
 export function parseSheet(a: string):number {
-  const b = parseInt(a.replace(/,/g, ''));
-  return b?b:0;
+  return parseInt(a?.replace(/,/g, '')?.replace(/\$/g, '')) || 0;
 }
 export function getVerts(sheet: any[][], collectorId?: string): categories {
   const verticles: categories = {

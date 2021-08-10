@@ -9,3 +9,7 @@ export async function discordLog(msg: string): Promise<void> {
     throw Error('Could not log to discord(not very important) <@&847275183114027028>');
   }
 }
+
+export function addCommas(item: string | number): string {
+  return item.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}

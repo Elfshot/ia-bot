@@ -1,7 +1,7 @@
 import { Command } from 'discord-akairo';
 import { Message, MessageEmbed } from 'discord.js';
 import { getSheet, updateSheet, parseSheet, ranks, categories, getVerts, getHori } from '../utils/sheets';
-import { discordLog } from '../utils/discord';
+import { discordLog, addCommas } from '../utils/discord';
 import { numberToEncodedLetter } from '../misc/numberToLetters';
 
 const voucherMoney: ranks= {
@@ -11,6 +11,9 @@ const voucherMoney: ranks= {
   'Fleet Admiral': 12000,
   'Grand Moff': 13500,
 };
+
+const collectionsSheet = process.env.COLLECTIONSNAME;
+
 
 export default class TurnInCommand extends Command {
   constructor() {
@@ -44,7 +47,7 @@ export default class TurnInCommand extends Command {
       else if (!newVouchersCount) return msg.reply('No vouchers amount specified!');
       //else if (newVouchersCount < 10) return msg.reply('We don\'t take less than 10 vouchers :wink:');
       else if (newVouchersCount > 1000000) return msg.reply('no.');
-      const originalSheet = await getSheet();
+      const originalSheet = await getSheet(collectionsSheet);
       
       const verticles: categories = getVerts(originalSheet, collectorId); 
       const hori = getHori(originalSheet, subjectId);
@@ -71,14 +74,14 @@ export default class TurnInCommand extends Command {
       const payout = newVouchersCount * voucherMoney[subjectRank];
       
       // vouchers taken
-      await updateSheet(`!${numberToEncodedLetter(verticles.collector+1)}${hori+1}`, newVouchers);
+      await updateSheet(collectionsSheet, `!${numberToEncodedLetter(verticles.collector+1)}${hori+1}`, [newVouchers === 0?'':newVouchers.toString()]);
       // total vouchers
-      await updateSheet(`!${numberToEncodedLetter(verticles[cleanSubjectRank]+1)}${hori+1}`, newVoucherTotal);
+      await updateSheet(collectionsSheet, `!${numberToEncodedLetter(verticles[cleanSubjectRank]+1)}${hori+1}`, [newVoucherTotal === 0?'':newVoucherTotal.toString()]);
       // date
-      await updateSheet(`!${numberToEncodedLetter(verticles['Last Turn-in']+1)}${hori+1}`, dateString);
+      await updateSheet(collectionsSheet, `!${numberToEncodedLetter(verticles['Last Turn-in']+1)}${hori+1}`, [dateString]);
 
       let conformationString = `Added \`${newVouchersCount}\` vouchers to \`${subject}\` by <@${collectorId}>. Payout: $\`${payout}\``;
-      conformationString += `\nNew total for \`${cleanSubjectRank}\`: \`${newVoucherTotal}\`\n  New date: \`${dateString}\``;
+      conformationString += `\n New total for \`${cleanSubjectRank}\`: \`${newVoucherTotal}\`\n  New date: \`${dateString}\``;
       console.log(conformationString);
       
       const embed = new MessageEmbed({
@@ -86,9 +89,9 @@ export default class TurnInCommand extends Command {
         title: `Vouchers received for ${subject}`,
         fields:[
           { name: 'Collector', value: `<@${collectorId}>`, inline: true },
-          { name: 'Vouchers Taken', value: newVouchersCount, inline: true },
-          { name: 'Payout', value: `$ ${payout}`, inline: true },
-          { name: 'New total', value: newCompleteVoucherTotal, inline: true },
+          { name: 'Vouchers Taken', value: addCommas(newVouchersCount), inline: true },
+          { name: 'Payout', value: `$${addCommas(payout)}\n(${payout})`, inline: true },
+          { name: 'New total', value: addCommas(newCompleteVoucherTotal), inline: true },
           //{ name: 'something', value: 'something else', inline: true }, placeholder
         ],
         image: { url: msg.author.avatarURL({ dynamic: true }) },
