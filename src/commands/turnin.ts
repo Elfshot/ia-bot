@@ -99,12 +99,12 @@ export default class TurnInCommand extends Command {
         timestamp: date,
       });
 
-      msg.channel.send(embed);
       await discordLog(conformationString);
+      await msg.channel.send(embed);
     }
     catch(err) {
       console.log(err);
-      return msg.reply(err.message);
+      return msg.reply(err);
     }
   }
 }

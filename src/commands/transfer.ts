@@ -110,14 +110,13 @@ export default class TransferCommand extends Command {
         footer: { text: 'Elfshot', iconURL: 'https://avatars.githubusercontent.com/u/44043197' },
         timestamp: date,
       });
-
-      msg.channel.send(embed);
+      
       await discordLog(conformationString);
-
+      await msg.channel.send(embed);
     }
     catch(err) {
       console.log(err);
-      return msg.reply(err.message);
+      return msg.reply(err);
     }
   }
 }
