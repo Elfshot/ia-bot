@@ -104,7 +104,7 @@ export default class TurnInCommand extends Command {
     }
     catch(err) {
       console.log(err);
-      return msg.reply(err);
+      return msg.reply('Yo me no work: ```\n' + err + '\n```');
     }
   }
 }

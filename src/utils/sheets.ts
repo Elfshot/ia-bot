@@ -110,14 +110,36 @@ export function getVerts(sheet: any[][], collectorId?: string): categories {
 }
 export function getHori(sheet: any[][], subjectId: string): number {
   let hori = 0;
+  let unhoriable = false;
+  let firedHori = 0;
+
   for (let i = 0; i < sheet.length; i++) {
-    const current = sheet[i][1];
-    if (current.includes('No longer in company')) break;
-    if (current.includes(`${subjectId}`)) {
-      hori = i;
+    const current: string = sheet[i]?.[1];
+    if (current == undefined) break;
+    if (current.includes('No longer in company')) {
+      unhoriable = true;
+      firedHori = i;
+    }
+    if (current == `${subjectId.trim().toLowerCase()}`) {
+      if (unhoriable) {
+        throw Error(`Man by id: ${subjectId} do be in the fired section`);
+      } else if (!unhoriable) { 
+        hori = i;
+      }
       break;
     }
   }
+
+  if (unhoriable) {
+    for (let i = firedHori; i < sheet.length; i++) {
+      const current: string = sheet[i]?.[0];
+      if (current == undefined) break;
+      if (current.trim().toLowerCase().endsWith(`${subjectId.trim().toLowerCase()}`)) {
+        throw Error(`Man by id: ${subjectId} do be in the fired section`);
+      }
+    }
+  }
+
   if (hori === 0) { throw Error(`Unable to find subject: ${subjectId}`); }
   return hori;
 }
