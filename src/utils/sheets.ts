@@ -68,6 +68,7 @@ export function getVerts(sheet: any[][], collectorId?: string): categories {
     'Pilot': 0,
     'Seasoned Pilot': 0,
     'Seasoned Pilot FM': 0,
+    'Imperial Officer': 0,
     'Fleet Admiral': 0,
     'Grand Moff': 0,
     'Last Turn-in': 0,
@@ -88,6 +89,9 @@ export function getVerts(sheet: any[][], collectorId?: string): categories {
         break;
       case 'Seasoned Pilot':
         verticles['Seasoned Pilot'] = i;
+        break;
+      case 'Imperial Officer':
+        verticles['Imperial Officer'] = i;
         break;
       case 'Fleet Admiral':
         verticles['Fleet Admiral'] = i;
@@ -148,6 +152,7 @@ export interface ranks {
   Pilot: number;
   'Seasoned Pilot': number;
   'Seasoned Pilot FM'?: number,
+  'Imperial Officer': number,
   'Fleet Admiral': number;
   'Grand Moff': number;
 }
@@ -156,6 +161,7 @@ export interface categories {
   Pilot: number;
   'Seasoned Pilot': number;
   'Seasoned Pilot FM'?: number,
+  'Imperial Officer': number,
   'Fleet Admiral': number;
   'Grand Moff': number;
   'Last Turn-in': number;

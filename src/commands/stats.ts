@@ -46,7 +46,8 @@ export default class StatsCommand extends Command {
       if (subjectRank === 'CEO') return msg.reply('Cannot add vouchers to CEO ranks');
       if (!subjectRank) return msg.reply('User has no rank');
       const vouchers = [parseSheet(subjectRow[verticles.Pilot]), parseSheet(subjectRow[verticles['Seasoned Pilot']]), 
-        parseSheet(subjectRow[verticles['Fleet Admiral']]), parseSheet(subjectRow[verticles['Grand Moff']])]; 
+        parseSheet(subjectRow[verticles['Imperial Officer']]), parseSheet(subjectRow[verticles['Fleet Admiral']]),
+        parseSheet(subjectRow[verticles['Grand Moff']])]; 
       const vouchersTotal = vouchers.reduce((a, b) => a + b);
       const embed = new MessageEmbed({
         type: 'rich',
@@ -54,8 +55,9 @@ export default class StatsCommand extends Command {
         fields:[
           { name: 'Pilot', value: vouchers[0], inline: true },
           { name: 'Seasoned Pilot', value: vouchers[1], inline: true },
-          { name: 'Fleet Admiral', value: vouchers[2], inline: true },
-          { name: 'Grand Moff', value: vouchers[3], inline: true },
+          { name: 'Imperial Officer', value: vouchers[2], inline: true },
+          { name: 'Fleet Admiral', value: vouchers[3], inline: true },
+          { name: 'Grand Moff', value: vouchers[4], inline: true },
           { name: 'Total', value: vouchersTotal }
           //{ name: 'something', value: 'something else', inline: true }, placeholder
         ],

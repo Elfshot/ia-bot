@@ -5,11 +5,12 @@ import { discordLog, addCommas } from '../utils/discord';
 import { numberToEncodedLetter } from '../misc/numberToLetters';
 
 const voucherMoney: ranks= {
-  'Pilot': 9000,
-  'Seasoned Pilot': 10500,
-  'Seasoned Pilot FM': 11025,
-  'Fleet Admiral': 12000,
-  'Grand Moff': 13500,
+  'Pilot': 10500,
+  'Seasoned Pilot': 12000,
+  'Seasoned Pilot FM': 12000,
+  'Imperial Officer': 13500,
+  'Fleet Admiral': 15000,
+  'Grand Moff': 15000,
 };
 
 const collectionsSheet = process.env.COLLECTIONSNAME;
@@ -80,7 +81,7 @@ export default class TurnInCommand extends Command {
       // date
       await updateSheet(collectionsSheet, `!${numberToEncodedLetter(verticles['Last Turn-in']+1)}${hori+1}`, [dateString]);
 
-      let conformationString = `Added \`${newVouchersCount}\` vouchers to \`${subject}\` by <@${collectorId}>. Payout: $\`${payout}\``;
+      let conformationString = `Added \`${newVouchersCount}\` vouchers to \`${subject} (${subjectId})\` by <@${collectorId}>. Payout: $\`${payout}\``;
       conformationString += `\n New total for \`${cleanSubjectRank}\`: \`${newVoucherTotal}\`\n  New date: \`${dateString}\``;
       console.log(conformationString);
       
