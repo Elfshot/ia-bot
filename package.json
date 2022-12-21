@@ -5,7 +5,7 @@
   "main": "bot.js",
   "scripts": {
     "build": "echo \"Updating packages, Deleting dist/ and re-compiling\" && npm install && rimraf dist/ && tsc",
-    "start": "rimraf dist/ && tsc && node dist/bot.js",
+    "start": "tsc && node dist/bot.js",
     "startprod": "npm run-script build && node dist/bot.js"
   },
   "keywords": [],

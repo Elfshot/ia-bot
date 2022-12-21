@@ -36,7 +36,7 @@ export default class TurnInCommand extends Command {
       channel: 'guild',
     });
   }  
-  async exec(msg: Message,args: { userId: string, amount: number }): Promise<Message> {
+  async exec(msg: Message, args: { userId: string, amount: number }): Promise<Message> {
     try {
       const date = new Date();
       const subjectId = args.userId;
